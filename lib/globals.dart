@@ -1,0 +1,2 @@
+library global;
+String? myToken;
