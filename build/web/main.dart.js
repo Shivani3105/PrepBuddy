@@ -80104,7 +80104,7 @@ break
 case 2:i=t.N
 n=A.af(["email",g,"password",o.f.a.a],i,i)
 q=6
-g=A.eh("http://192.168.1.37:3000/login")
+g=A.eh("https://prepbuddy-1.onrender.com/login")
 i=A.af(["Content-Type","application/json"],i,i)
 s=9
 return A.S(A.anB(g,B.aL.pk(n,null),i),$async$yW)
@@ -80179,7 +80179,7 @@ var $async$lB=A.J(function(a,b){if(a===1){p.push(b)
 s=q}while(true)switch(s){case 0:q=3
 j=t.N
 n=A.af(["subject",o.a.c],j,j)
-i=A.eh("http://192.168.1.37:3000/getQnA")
+i=A.eh("https://prepbuddy-1.onrender.com/getQnA")
 j=A.af(["Content-Type","application/json"],j,j)
 s=6
 return A.S(A.anB(i,B.aL.pk(n,null),j),$async$lB)
@@ -80242,7 +80242,7 @@ afZ(a,b,c,d){var s=0,r=A.N(t.H),q=this,p,o,n,m
 var $async$tE=A.J(function(e,f){if(e===1)return A.K(f,r)
 while(true)switch(s){case 0:o=t.N
 n=A.af(["_id",a,"ques",b,"companyname",c,"count",d],o,t.K)
-m=A.eh("http://192.168.1.37:3000/editQnA")
+m=A.eh("https://prepbuddy-1.onrender.com/editQnA")
 o=A.af(["Content-Type","application/json"],o,o)
 s=2
 return A.S(A.aLH(m,B.aL.pk(n,null),o),$async$tE)
@@ -80255,7 +80255,7 @@ afB(a){var s=0,r=A.N(t.H),q=this,p,o
 var $async$xU=A.J(function(b,c){if(b===1)return A.K(c,r)
 while(true)switch(s){case 0:p=t.N
 s=2
-return A.S(A.axO(A.eh("http://192.168.1.37:3000/deleteQnA/"+a),A.af(["Content-Type","application/json"],p,p)),$async$xU)
+return A.S(A.axO(A.eh("https://prepbuddy-1.onrender.com/deleteQnA/"+a),A.af(["Content-Type","application/json"],p,p)),$async$xU)
 case 2:o=c
 if(o.b===200)q.lB()
 else{A.fs("\u274c Delete failed: "+A.EY(A.EQ(o.e)).dw(o.w))
@@ -80324,7 +80324,7 @@ break
 case 2:p=q.a
 o=t.N
 n=A.af(["count",1,"subject",p.a.c,"ques",l,"companyname",q.c.a.a,"useremail",p.e],o,t.X)
-l=A.eh("http://192.168.1.37:3000/createQnA")
+l=A.eh("https://prepbuddy-1.onrender.com/createQnA")
 o=A.af(["Content-Type","application/json"],o,o)
 s=4
 return A.S(A.anB(l,B.aL.pk(n,null),o),$async$$0)
@@ -80386,7 +80386,7 @@ i=!i.b.test(c)}else i=!0
 if(i){n.c.ag(t.Q).f.hS(B.OJ)
 s=1
 break}n.al(new A.aj0(n))
-m=A.eh("http://192.168.1.37:3000/registration")
+m=A.eh("https://prepbuddy-1.onrender.com/registration")
 i=t.N
 h=t.z
 l=A.af(["email",d,"password",c],i,h)
