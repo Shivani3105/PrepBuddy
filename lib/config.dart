@@ -1,6 +1,6 @@
 // config.dart
 
-const String baseUrl = 'http://192.168.1.36:3000';
+const String baseUrl = 'http://192.168.1.37:3000';
 const String reg = '$baseUrl/registration';
 const String login='$baseUrl/login';
 const String storetodo='$baseUrl/storeTodo';

@@ -41,7 +41,7 @@ const login = async (req, res) => {
     }
 
     const tokenData = { _id: user._id, email: user.email };
-    const token = UserService.generateToken(tokenData, "secretkey", "1h");
+    const token = UserService.generateToken(tokenData,process.env.JWT_SECRET, "1h");
     
     res.status(200).json({ status: true, token });
   } catch (error) {
