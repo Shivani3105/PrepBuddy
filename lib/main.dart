@@ -1,24 +1,28 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_application_2/dashboard.dart';
 import 'package:flutter_application_2/subjectpage.dart';
+import 'package:flutter_application_2/startscreen.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
-import 'config.dart';
-import 'SignInPage.dart';
-import 'startscreen.dart';
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? storedToken = prefs.getString('token');
+import 'globals.dart';
 
-  runApp(MyApp(token: storedToken ?? ""));
+void main() {
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final String token;
-  const MyApp({Key? key, required this.token}) : super(key: key);
+  const MyApp({super.key});
+
+  Future<bool> isTokenValid() async {
+    final prefs = await SharedPreferences.getInstance();
+    myToken = prefs.getString('token');
+
+    if (myToken == null || myToken!.isEmpty || JwtDecoder.isExpired(myToken!)) {
+      return false;
+    } else {
+      return true;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,32 +33,20 @@ class MyApp extends StatelessWidget {
         primaryColor: Colors.blue,
         useMaterial3: false,
       ),
-      home: (token.isEmpty || JwtDecoder.isExpired(token))
-          ? const StartScreen()
-          : SubjectPage(),
-          //Dashboard(token: token),
+      home: FutureBuilder<bool>(
+        future: isTokenValid(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else {
+            if (snapshot.data == true) {
+              return SubjectPage(); // ✅ token valid
+            } else {
+              return const StartScreen(); // ❌ token missing or expired
+            }
+          }
+        },
+      ),
     );
   }
 }
-// import 'package:flutter/material.dart';
-// import 'subjectpage.dart'; // 👈 Make sure this file exists
-
-// void main() {
-//   runApp(const MyApp());
-// }
-
-// class MyApp extends StatelessWidget {
-//   const MyApp({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       debugShowCheckedModeBanner: false,
-//       title: 'Subject App',
-//       theme: ThemeData(
-//         primarySwatch: Colors.teal,
-//       ),
-//       home:  SubjectPage(), // 👈 This is where your custom page runs
-//     );
-//   }
-// }

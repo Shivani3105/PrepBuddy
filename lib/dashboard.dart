@@ -1,13 +1,11 @@
-
-
-
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_2/globals.dart';
+import 'package:flutter_application_2/startscreen.dart';
 import 'package:http/http.dart' as http;
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'config.dart';
-import 'SignInPage.dart';
 
 class Dashboard extends StatefulWidget {
   final String subject;
@@ -19,7 +17,7 @@ class Dashboard extends StatefulWidget {
 
 class _DashboardState extends State<Dashboard> {
   List? items;
-  String? useremail;
+  String? loggedInEmail;
 
   @override
   void initState() {
@@ -28,17 +26,17 @@ class _DashboardState extends State<Dashboard> {
   }
 
   Future<void> initData() async {
-    await getemailid();
-    await fetchTasks();
-  }
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
 
-  Future<void> getemailid() async {
-    if (myToken != null) {
-      Map<String, dynamic> decodedtoken = JwtDecoder.decode(myToken!);
-      useremail = decodedtoken['email'];
+    if (token != null && token.isNotEmpty && !JwtDecoder.isExpired(token)) {
+      final decoded = JwtDecoder.decode(token);
+      loggedInEmail = decoded['email'];
     } else {
-      useremail = null;
+      loggedInEmail = null;
     }
+
+    await fetchTasks();
   }
 
   Future<void> fetchTasks() async {
@@ -56,16 +54,22 @@ class _DashboardState extends State<Dashboard> {
           items = jsonResponse['success'];
         });
       } else {
-        print("⚠️ Error: Status Code = ${response.statusCode}");
-        setState(() {
-          items = [];
-        });
+        setState(() => items = []);
       }
     } catch (e) {
-      print("❌ fetchTasks error: $e");
-      setState(() {
-        items = [];
-      });
+      setState(() => items = []);
+    }
+  }
+
+  Future<void> logoutUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token');
+    if (context.mounted) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const StartScreen()),
+        (route) => false,
+      );
     }
   }
 
@@ -73,7 +77,15 @@ class _DashboardState extends State<Dashboard> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(title: Text("${widget.subject.toUpperCase()} QnA")),
+      appBar: AppBar(
+        title: Text("${widget.subject.toUpperCase()} QnA"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: logoutUser,
+          ),
+        ],
+      ),
       body: Column(
         children: [
           Container(
@@ -119,19 +131,12 @@ class _DashboardState extends State<Dashboard> {
                     itemBuilder: (context, index) {
                       final task = items![index];
                       return Card(
-                        margin: const EdgeInsets.symmetric(
-                          horizontal: 5,
-                          vertical: 10,
-                        ),
+                        margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
                         child: ListTile(
                           leading: const Icon(Icons.question_answer),
                           title: Text(task['ques']),
                           subtitle: Text(
-                            task['companyname'] != null &&
-                                    task['companyname']
-                                        .toString()
-                                        .trim()
-                                        .isNotEmpty
+                            task['companyname']?.toString().trim().isNotEmpty == true
                                 ? task['companyname']
                                 : 'No company specified',
                             style: const TextStyle(color: Colors.grey),
@@ -141,72 +146,42 @@ class _DashboardState extends State<Dashboard> {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(
-            icon: const Icon(
-              Icons.thumb_up,
-              color: Colors.green,
-            ),
-            onPressed: () async {
-              print("👍 tapped");
-              setState(() {
-                task['count'] = (task['count']) + 1;
-
-              });
-              await editTask(
-                task['_id'],
-                task['ques'],
-                task['companyname'],
-                task['count'],
-              );
-              await fetchTasks();
-            },
-          ),
-          Text(
-            "${task['count']}",
-            style: const TextStyle(fontSize: 10),
-          ),
-        ],),
                                 IconButton(
-                                  icon: const Icon(
-                                    Icons.edit,
-                                    color: Colors.blue,
-                                    size: 20,
-                                  ),
+                                  icon: const Icon(Icons.thumb_up, color: Colors.green),
+                                  onPressed: () async {
+                                    setState(() {
+                                      task['count'] = (task['count']) + 1;
+                                    });
+                                    await editTask(
+                                      task['_id'],
+                                      task['ques'],
+                                      task['companyname'],
+                                      task['count'],
+                                    );
+                                    await fetchTasks();
+                                  },
+                                ),
+                                Text("${task['count']}", style: const TextStyle(fontSize: 10)),
+                                IconButton(
+                                  icon: const Icon(Icons.edit, color: Colors.blue),
                                   onPressed: () {
-                                    if (useremail != null &&
-                                        useremail == task['useremail']) {
+                                    if (loggedInEmail == task['useremail']) {
                                       showEditDialog(task);
                                     } else {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        const SnackBar(
-                                          content: Text(
-                                              "You can only edit your own questions."),
-                                        ),
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text("You can only edit your own questions.")),
                                       );
                                     }
                                   },
                                 ),
                                 IconButton(
-                                  icon: const Icon(
-                                    Icons.delete,
-                                    color: Colors.red,
-                                    size: 20,
-                                  ),
-                                  onPressed: () {
-                                    if (useremail != null &&
-                                        useremail == task['useremail']) {
-                                      deleteTask(task['_id']);
+                                  icon: const Icon(Icons.delete, color: Colors.red),
+                                  onPressed: () async {
+                                    if (loggedInEmail == task['useremail']) {
+                                      await deleteTask(task['_id']);
                                     } else {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        const SnackBar(
-                                          content: Text(
-                                              "You can only delete your own questions."),
-                                        ),
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text("You can only delete your own questions.")),
                                       );
                                     }
                                   },
@@ -224,14 +199,14 @@ class _DashboardState extends State<Dashboard> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
-        onPressed: onPressedFunc,
+        onPressed: () => onPressedFunc(),
         child: const Icon(Icons.add),
       ),
     );
   }
 
-  void onPressedFunc() async {
-    if (useremail == null || useremail!.isEmpty) {
+  void onPressedFunc() {
+    if (loggedInEmail == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("User not logged in! Please sign in.")),
       );
@@ -255,9 +230,7 @@ class _DashboardState extends State<Dashboard> {
               ),
               TextField(
                 controller: descController,
-                decoration: const InputDecoration(
-                  labelText: "Company Name (optional)",
-                ),
+                decoration: const InputDecoration(labelText: "Company Name (optional)"),
               ),
             ],
           ),
@@ -275,7 +248,7 @@ class _DashboardState extends State<Dashboard> {
                     'subject': widget.subject,
                     'ques': titleController.text,
                     'companyname': descController.text,
-                    'useremail': useremail,
+                    'useremail': loggedInEmail,
                   };
 
                   var response = await http.post(
@@ -289,9 +262,8 @@ class _DashboardState extends State<Dashboard> {
                     await Future.delayed(const Duration(milliseconds: 300));
                     await fetchTasks();
                   } else {
-                    print("❌ Failed to add: ${response.body}");
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text("Failed to add question.")),
+                      const SnackBar(content: Text("Failed to add question.")),
                     );
                   }
                 }
@@ -304,10 +276,8 @@ class _DashboardState extends State<Dashboard> {
   }
 
   void showEditDialog(Map task) {
-    final TextEditingController editQues =
-        TextEditingController(text: task['ques']);
-    final TextEditingController editCompany =
-        TextEditingController(text: task['companyname']);
+    final TextEditingController editQues = TextEditingController(text: task['ques']);
+    final TextEditingController editCompany = TextEditingController(text: task['companyname']);
 
     showDialog(
       context: context,
@@ -371,9 +341,8 @@ class _DashboardState extends State<Dashboard> {
     );
 
     if (response.statusCode != 201) {
-      print("❌ Edit failed: ${response.body}");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to update question.")),
+        const SnackBar(content: Text("Failed to update question.")),
       );
     }
   }
@@ -387,9 +356,8 @@ class _DashboardState extends State<Dashboard> {
     if (response.statusCode == 200) {
       fetchTasks();
     } else {
-      print("❌ Delete failed: ${response.body}");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to delete question.")),
+        const SnackBar(content: Text("Failed to delete question.")),
       );
     }
   }
