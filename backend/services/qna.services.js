@@ -10,8 +10,8 @@ class QnAServices {
     const qnadata = await qnaModel.find({ subject });
     return qnadata;
   }
-    static async getUserQnA(useremail) {
-    const qnadata = await qnaModel.find({useremail});
+    static async getUserQnA(email) {
+    const qnadata = await qnaModel.find({useremail:email});
     return qnadata;
   }
   static async getQuesObj(_id)

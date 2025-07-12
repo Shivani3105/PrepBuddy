@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_application_2/startscreen.dart';
-import 'dashboard.dart'; // make sure this import is correct
+import 'dashboard.dart';
 
-class SubjectPage extends StatelessWidget {
-  SubjectPage({super.key});
+class SubjectPage extends StatefulWidget {
+  const SubjectPage({super.key});
 
+  @override
+  State<SubjectPage> createState() => _SubjectPageState();
+}
+
+class _SubjectPageState extends State<SubjectPage> {
   final List<Map<String, dynamic>> subjects = [
     {
       'name': 'Data Structures & Algorithms',
@@ -39,10 +44,12 @@ class SubjectPage extends StatelessWidget {
     },
   ];
 
-  /// 🔒 Logout method
-  Future<void> logoutUser(BuildContext context) async {
+  Future<void> logoutUser() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('token'); // or prefs.clear();
+    await prefs.remove('token');
+
+    if (!mounted) return;
+
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (_) => const StartScreen()),
@@ -57,10 +64,10 @@ class SubjectPage extends StatelessWidget {
         title: const Text("Placement Subjects"),
         centerTitle: true,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'Logout',
-            onPressed: () => logoutUser(context),
+          TextButton.icon(
+            onPressed: logoutUser,
+            icon: const Icon(Icons.logout, color: Colors.white),
+            label: const Text('Logout', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -90,7 +97,7 @@ class SubjectPage extends StatelessWidget {
                 color: subject['color'].withOpacity(0.9),
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: const [
-                  BoxShadow(color: Colors.black26, blurRadius: 6)
+                  BoxShadow(color: Colors.black26, blurRadius: 6),
                 ],
               ),
               child: Center(
