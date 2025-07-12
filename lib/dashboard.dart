@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_2/getUrQues.dart';
 import 'package:flutter_application_2/globals.dart';
 import 'package:flutter_application_2/startscreen.dart';
 import 'package:http/http.dart' as http;
@@ -73,6 +74,29 @@ class _DashboardState extends State<Dashboard> {
     }
   }
 
+  Future<void> handleUpvote(String id) async {
+    var body = {
+      "_id": id,
+      "useremail": loggedInEmail,
+    };
+
+    var response = await http.post(
+      Uri.parse(upvoteuser), // make sure this is defined in `config.dart`
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode == 200) {
+      await fetchTasks();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(jsonDecode(response.body)['message'] ?? "Already upvoted"),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -80,9 +104,20 @@ class _DashboardState extends State<Dashboard> {
       appBar: AppBar(
         title: Text("${widget.subject.toUpperCase()} QnA"),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: logoutUser,
+          TextButton.icon(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const MyQuestionsPage()),
+              );
+            },
+            icon: const Icon(Icons.person, color: Colors.white),
+            label: const Text('My Questions', style: TextStyle(color: Colors.white)),
+          ),
+          TextButton.icon(
+            onPressed: () => logoutUser(),
+            icon: const Icon(Icons.logout, color: Colors.white),
+            label: const Text('Logout', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -105,17 +140,11 @@ class _DashboardState extends State<Dashboard> {
                   children: [
                     const Text(
                       "Most Asked Questions",
-                      style: TextStyle(
-                        fontSize: 20,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 5),
                     Text(
-                      items == null
-                          ? "Loading..."
-                          : "${items!.length} Question${items!.length == 1 ? '' : 's'}",
+                      items == null ? "Loading..." : "${items!.length} Question${items!.length == 1 ? '' : 's'}",
                       style: const TextStyle(color: Colors.white70),
                     ),
                   ],
@@ -148,18 +177,7 @@ class _DashboardState extends State<Dashboard> {
                               children: [
                                 IconButton(
                                   icon: const Icon(Icons.thumb_up, color: Colors.green),
-                                  onPressed: () async {
-                                    setState(() {
-                                      task['count'] = (task['count']) + 1;
-                                    });
-                                    await editTask(
-                                      task['_id'],
-                                      task['ques'],
-                                      task['companyname'],
-                                      task['count'],
-                                    );
-                                    await fetchTasks();
-                                  },
+                                  onPressed: () => handleUpvote(task['_id']),
                                 ),
                                 Text("${task['count']}", style: const TextStyle(fontSize: 10)),
                                 IconButton(
@@ -224,21 +242,12 @@ class _DashboardState extends State<Dashboard> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(
-                controller: titleController,
-                decoration: const InputDecoration(labelText: "Question"),
-              ),
-              TextField(
-                controller: descController,
-                decoration: const InputDecoration(labelText: "Company Name (optional)"),
-              ),
+              TextField(controller: titleController, decoration: const InputDecoration(labelText: "Question")),
+              TextField(controller: descController, decoration: const InputDecoration(labelText: "Company Name")),
             ],
           ),
           actions: [
-            TextButton(
-              child: const Text("Cancel"),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
+            TextButton(child: const Text("Cancel"), onPressed: () => Navigator.of(context).pop()),
             ElevatedButton(
               child: const Text("ADD"),
               onPressed: () async {
@@ -287,30 +296,16 @@ class _DashboardState extends State<Dashboard> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(
-                controller: editQues,
-                decoration: const InputDecoration(labelText: "Question"),
-              ),
-              TextField(
-                controller: editCompany,
-                decoration: const InputDecoration(labelText: "Company Name"),
-              ),
+              TextField(controller: editQues, decoration: const InputDecoration(labelText: "Question")),
+              TextField(controller: editCompany, decoration: const InputDecoration(labelText: "Company Name")),
             ],
           ),
           actions: [
-            TextButton(
-              child: const Text("Cancel"),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
+            TextButton(child: const Text("Cancel"), onPressed: () => Navigator.of(context).pop()),
             ElevatedButton(
               child: const Text("Update"),
               onPressed: () async {
-                await editTask(
-                  task['_id'],
-                  editQues.text,
-                  editCompany.text,
-                  task['count'],
-                );
+                await editTask(task['_id'], editQues.text, editCompany.text, task['count']);
                 Navigator.of(context).pop();
                 fetchTasks();
               },
@@ -321,12 +316,7 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  Future<void> editTask(
-    String id,
-    String newQues,
-    String newCompany,
-    int count,
-  ) async {
+  Future<void> editTask(String id, String newQues, String newCompany, int count) async {
     var body = {
       '_id': id,
       'ques': newQues,

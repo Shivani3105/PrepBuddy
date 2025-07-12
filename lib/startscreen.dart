@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_2/about.dart';
 import 'package:flutter_application_2/registration.dart';
 import 'SignInPage.dart';
 
@@ -84,7 +85,7 @@ class StartScreen extends StatelessWidget {
 
                 // 🔐 Login Button
                 AnimatedButton(
-                  label: "LOGIN",
+                  label: "Sign in",
                   icon: Icons.lock,
                   onPressed: () {
                     Navigator.push(
@@ -100,7 +101,7 @@ class StartScreen extends StatelessWidget {
 
                 // 📝 Register Button
                 AnimatedButton(
-                  label: "REGISTER",
+                  label: "Register",
                   icon: Icons.edit,
                   onPressed: () {
                     Navigator.push(
@@ -116,6 +117,19 @@ class StartScreen extends StatelessWidget {
           ),
         ),
       ),
+        floatingActionButton: FloatingActionButton.extended(
+    onPressed: () {
+      // Navigate to About/Features Page
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const AboutApp()),
+      );
+    },
+    icon: const Icon(Icons.info_outline),
+    label: const Text("About App"),
+    backgroundColor: Colors.blue.shade800,
+  ),
+  floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }

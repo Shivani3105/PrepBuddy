@@ -22,6 +22,10 @@ const qnaSchema=new Schema({
     count:{
         type:Number,
         default:0
+    },
+    upvotedby:{
+        type:[String],
+        default:[]
     }
 });
 const qnaModel=db.model('qna',qnaSchema);

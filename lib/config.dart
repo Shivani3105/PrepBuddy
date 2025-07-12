@@ -11,5 +11,6 @@ const String getQnA = '$baseUrl/getQnA';
 String deleteQnA(String id) => '$baseUrl/deleteQnA/$id';
 const String editQnA = '$baseUrl/editQnA';
 const String updateCountQnA = '$baseUrl/updateCountQnA';
-
+const String getUserQnA = "$baseUrl/getUserQnA";
+const String upvoteuser="$baseUrl/upvoteuser";
 const adminemail = "guptashivani312002@gmail.com";

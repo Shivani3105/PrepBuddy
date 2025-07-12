@@ -10,6 +10,14 @@ class QnAServices {
     const qnadata = await qnaModel.find({ subject });
     return qnadata;
   }
+    static async getUserQnA(useremail) {
+    const qnadata = await qnaModel.find({useremail});
+    return qnadata;
+  }
+  static async getQuesObj(_id)
+  {
+    return await qnaModel.findById(_id);
+  }
 
   static async editqna(_id, ques, companyname,count) {
     return await qnaModel.findByIdAndUpdate(_id, { ques, companyname ,count}); // ✅ updated field
