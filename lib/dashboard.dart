@@ -50,8 +50,13 @@ class _DashboardState extends State<Dashboard> {
 
       if (response.statusCode == 200) {
         var jsonResponse = jsonDecode(response.body);
+        List fetchedItems = jsonResponse['success'];
+
+        // 🔽 Sort by 'count' descending
+        fetchedItems.sort((a, b) => (b['count'] ?? 0).compareTo(a['count'] ?? 0));
+
         setState(() {
-          items = jsonResponse['success'];
+          items = fetchedItems;
         });
       } else {
         setState(() => items = []);
@@ -86,7 +91,7 @@ class _DashboardState extends State<Dashboard> {
     );
 
     if (response.statusCode == 200) {
-      await fetchTasks();
+      await fetchTasks(); // Refresh with new upvote
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -175,7 +180,7 @@ class _DashboardState extends State<Dashboard> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 IconButton(
-                                  icon: const Icon(Icons.thumb_up, color: Colors.green),
+                                  icon: Image.asset('assets/arrow.png'),
                                   onPressed: () => handleUpvote(task['_id']),
                                 ),
                                 Text("${task['count']}", style: const TextStyle(fontSize: 10)),
