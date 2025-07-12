@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_2/getUrQues.dart';
-import 'package:flutter_application_2/globals.dart';
 import 'package:flutter_application_2/startscreen.dart';
 import 'package:http/http.dart' as http;
 import 'package:jwt_decoder/jwt_decoder.dart';
@@ -81,7 +80,7 @@ class _DashboardState extends State<Dashboard> {
     };
 
     var response = await http.post(
-      Uri.parse(upvoteuser), // make sure this is defined in `config.dart`
+      Uri.parse(upvoteuser),
       headers: {"Content-Type": "application/json"},
       body: jsonEncode(body),
     );
@@ -171,7 +170,7 @@ class _DashboardState extends State<Dashboard> {
                             style: const TextStyle(color: Colors.grey),
                           ),
                           trailing: SizedBox(
-                            width: 150,
+                            width: 70,
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
@@ -180,30 +179,6 @@ class _DashboardState extends State<Dashboard> {
                                   onPressed: () => handleUpvote(task['_id']),
                                 ),
                                 Text("${task['count']}", style: const TextStyle(fontSize: 10)),
-                                IconButton(
-                                  icon: const Icon(Icons.edit, color: Colors.blue),
-                                  onPressed: () {
-                                    if (loggedInEmail == task['useremail']) {
-                                      showEditDialog(task);
-                                    } else {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(content: Text("You can only edit your own questions.")),
-                                      );
-                                    }
-                                  },
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.delete, color: Colors.red),
-                                  onPressed: () async {
-                                    if (loggedInEmail == task['useremail']) {
-                                      await deleteTask(task['_id']);
-                                    } else {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(content: Text("You can only delete your own questions.")),
-                                      );
-                                    }
-                                  },
-                                ),
                               ],
                             ),
                           ),
@@ -282,73 +257,5 @@ class _DashboardState extends State<Dashboard> {
         );
       },
     );
-  }
-
-  void showEditDialog(Map task) {
-    final TextEditingController editQues = TextEditingController(text: task['ques']);
-    final TextEditingController editCompany = TextEditingController(text: task['companyname']);
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Edit"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(controller: editQues, decoration: const InputDecoration(labelText: "Question")),
-              TextField(controller: editCompany, decoration: const InputDecoration(labelText: "Company Name")),
-            ],
-          ),
-          actions: [
-            TextButton(child: const Text("Cancel"), onPressed: () => Navigator.of(context).pop()),
-            ElevatedButton(
-              child: const Text("Update"),
-              onPressed: () async {
-                await editTask(task['_id'], editQues.text, editCompany.text, task['count']);
-                Navigator.of(context).pop();
-                fetchTasks();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> editTask(String id, String newQues, String newCompany, int count) async {
-    var body = {
-      '_id': id,
-      'ques': newQues,
-      'companyname': newCompany,
-      'count': count,
-    };
-
-    final response = await http.put(
-      Uri.parse(editQnA),
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode(body),
-    );
-
-    if (response.statusCode != 201) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Failed to update question.")),
-      );
-    }
-  }
-
-  Future<void> deleteTask(String id) async {
-    final response = await http.delete(
-      Uri.parse(deleteQnA(id)),
-      headers: {"Content-Type": "application/json"},
-    );
-
-    if (response.statusCode == 200) {
-      fetchTasks();
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Failed to delete question.")),
-      );
-    }
   }
 }

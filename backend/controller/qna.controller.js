@@ -4,7 +4,7 @@ exports.createqna = async (req, res, next) => {
     try {
         const {useremail, subject, ques, companyname,count } = req.body;
         const qnaitem = await qnaServices.createqna(useremail,subject, ques, companyname,count);
-
+        qnaitem.upvotedby.push(useremail);
         res.status(201).json({
             status: true,
             success: qnaitem,

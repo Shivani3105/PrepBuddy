@@ -2,6 +2,7 @@ const qnaModel = require("../model/qna.model");
 
 class QnAServices {
   static async createqna(useremail,subject, ques, companyname,count) {
+    
     const createqnaitem = new qnaModel({useremail, subject, ques, companyname,count }); // ✅ updated field
     return await createqnaitem.save();
   }

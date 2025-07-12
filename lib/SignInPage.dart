@@ -61,23 +61,23 @@ class _SignInPageState extends State<SignInPage> {
             );
           } else {
             setState(() {
-              debugMessage = "❌ Invalid credentials or token not received.";
+              debugMessage = "Email or password is incorrect";
             });
           }
         } else {
           setState(() {
-            debugMessage = "❗ Server returned status: ${response.statusCode}";
+            debugMessage = "Email or password is incorrect";
           });
         }
       } catch (e) {
         setState(() {
-          debugMessage = "🚫 Error: $e";
+          debugMessage = "Email or password is incorrect";
         });
       }
     } else {
       setState(() {
         _isNotValidate = true;
-        debugMessage = "⚠️ Email or password cannot be empty.";
+        debugMessage = " Email or password cannot be empty.";
       });
     }
   }
