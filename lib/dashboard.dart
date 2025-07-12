@@ -170,7 +170,7 @@ class _DashboardState extends State<Dashboard> {
                             style: const TextStyle(color: Colors.grey),
                           ),
                           trailing: SizedBox(
-                            width: 70,
+                            width: 100,
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
@@ -228,7 +228,7 @@ class _DashboardState extends State<Dashboard> {
               onPressed: () async {
                 if (titleController.text.isNotEmpty) {
                   var reqBody = {
-                    'count': 1,
+                    'count': 0,
                     'subject': widget.subject,
                     'ques': titleController.text,
                     'companyname': descController.text,
