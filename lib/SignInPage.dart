@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_2/globals.dart';
 import 'package:flutter_application_2/subjectpage.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // ✅ Fixed import
 import 'config.dart';
 
 class SignInPage extends StatefulWidget {
@@ -19,9 +19,16 @@ class _SignInPageState extends State<SignInPage> {
   final passwordController = TextEditingController();
 
   bool _isNotValidate = false;
-  String? debugMessage; // 👈 to store text to display
+  bool isLoading = false;
+  String? debugMessage;
 
   void loginUser() async {
+    setState(() {
+      isLoading = true;
+      _isNotValidate = false;
+      debugMessage = null;
+    });
+
     prefs = await SharedPreferences.getInstance();
 
     if (emailController.text.isNotEmpty && passwordController.text.isNotEmpty) {
@@ -38,27 +45,21 @@ class _SignInPageState extends State<SignInPage> {
         );
 
         if (response.statusCode == 200) {
-          final bodyText = response.body;
-          final jsonResponse = jsonDecode(bodyText);
-
-          setState(() {
-            debugMessage = "🟢 Token from backend: ${jsonResponse['token']}";
-          });
-
+          final jsonResponse = jsonDecode(response.body);
           if (jsonResponse['status'] == true && jsonResponse['token'] != null) {
             myToken = jsonResponse['token'];
             await prefs.setString('token', myToken!);
-           String? savedToken = prefs.getString('token');
-            print("🟢 Saved token: $savedToken");
+
             setState(() {
-              debugMessage = "✅ Token saved successfully: $myToken";
+              debugMessage = "✅ Login successful!";
             });
 
-            // Uncomment this when you're done debugging
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => SubjectPage()),
-            );
+            if (context.mounted) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const SubjectPage()),
+              );
+            }
           } else {
             setState(() {
               debugMessage = "Email or password is incorrect";
@@ -71,22 +72,31 @@ class _SignInPageState extends State<SignInPage> {
         }
       } catch (e) {
         setState(() {
-          debugMessage = "Email or password is incorrect";
+          debugMessage = "Something went wrong. Try again.";
         });
       }
     } else {
       setState(() {
         _isNotValidate = true;
-        debugMessage = " Email or password cannot be empty.";
+        debugMessage = "Email or password cannot be empty.";
       });
     }
+
+    setState(() {
+      isLoading = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
-      appBar: AppBar(title: const Text("Sign In"),
-      ),
+      appBar: AppBar(title: const Text("Sign In")),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -120,8 +130,6 @@ class _SignInPageState extends State<SignInPage> {
                 "Email or Password can't be empty!",
                 style: TextStyle(color: Colors.red),
               ),
-
-            // ✅ Debug message visible below
             if (debugMessage != null) ...[
               const Divider(),
               Text(
