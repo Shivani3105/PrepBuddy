@@ -26,6 +26,11 @@ const qnaSchema=new Schema({
     upvotedby:{
         type:[String],
         default:[]
+    },
+    commnetSection:{
+        type:Map,
+        of: String,
+        default:[]
     }
 });
 const qnaModel=db.model('qna',qnaSchema);

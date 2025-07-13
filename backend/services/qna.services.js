@@ -27,6 +27,7 @@ class QnAServices {
   static async deleteqna(id) {
     return await qnaModel.findByIdAndDelete(id);
   }
+  
 }
 
 module.exports = QnAServices;

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_2/comment.dart';
 import 'package:flutter_application_2/getUrQues.dart';
 import 'package:flutter_application_2/startscreen.dart';
 import 'package:http/http.dart' as http;
@@ -134,7 +135,7 @@ class _DashboardState extends State<Dashboard> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const CircleAvatar(
+                 CircleAvatar(
                   backgroundColor: Colors.white,
                   child: Icon(Icons.menu, color: Colors.black),
                 ),
@@ -179,6 +180,18 @@ class _DashboardState extends State<Dashboard> {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
+                                IconButton(
+  icon: const Icon(Icons.comment),
+  onPressed: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => Comments(questionId: task['_id']),
+      ),
+    );
+  },
+),
+
                                 IconButton(
                                   icon: Image.asset('assets/arrow.png'),
                                   onPressed: () => handleUpvote(task['_id']),

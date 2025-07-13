@@ -14,3 +14,5 @@ const String updateCountQnA = '$baseUrl/updateCountQnA';
 const String getUserQnA = "$baseUrl/getUserQnA";
 const String upvoteuser="$baseUrl/upvoteuser";
 const adminemail = "guptashivani312002@gmail.com";
+const String getComment="$baseUrl/getComment";
+const String addComment="$baseUrl/addComment";
