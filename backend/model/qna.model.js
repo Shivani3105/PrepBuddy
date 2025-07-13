@@ -27,7 +27,7 @@ const qnaSchema=new Schema({
         type:[String],
         default:[]
     },
-    commetSection:{
+    commentSection:{
         type:Map,
         of: String,
         default:[]
