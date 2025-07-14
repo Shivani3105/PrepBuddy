@@ -31,18 +31,20 @@ class _CommentsState extends State<Comments> {
 
     if (token != null && token.isNotEmpty && !JwtDecoder.isExpired(token)) {
       final decoded = JwtDecoder.decode(token);
-      final userId = decoded['id'];
+      final userId = decoded['_id'];
 
       final response = await http.post(
         Uri.parse(getUser),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"_id": userId}),
       );
+      print(userId);
       print("*****************");
       print(response.body);
       if (response.statusCode == 201) {
         final data = jsonDecode(response.body);
         loggedInUserName = data['success']['username'];
+        print(loggedInUserName);
       } else {
         loggedInUserName = null;
       }

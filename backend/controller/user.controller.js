@@ -33,7 +33,7 @@ const getUser = async (req, res) => {
       });
     }
 
-    return res.status(200).json({
+    return res.status(201).json({
       status: true,
       user
     });
