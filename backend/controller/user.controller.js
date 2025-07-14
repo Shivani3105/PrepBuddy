@@ -35,7 +35,7 @@ const getUser = async (req, res) => {
 
     return res.status(201).json({
       status: true,
-      user
+      success:user
     });
   } catch (error) {
     res.status(500).json({

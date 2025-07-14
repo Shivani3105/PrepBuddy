@@ -122,7 +122,7 @@ class _CommentsState extends State<Comments> {
                 if (commentController.text.isNotEmpty) {
                   var reqBody = {
                     'comment': commentController.text,
-                    'useremail': loggedInUserName,
+                    'username': loggedInUserName,
                     '_id': widget.questionId,
                   };
 
