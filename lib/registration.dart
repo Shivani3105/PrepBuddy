@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_2/SignInPage.dart';
 import 'package:http/http.dart' as http;
-import 'config.dart'; // Ensure it has your API URL
+import 'config.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -14,16 +14,17 @@ class RegisterPage extends StatefulWidget {
 class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final TextEditingController usernameController = TextEditingController();
   bool isLoading = false;
 
   Future<void> registerUser() async {
     final String email = emailController.text.trim();
     final String password = passwordController.text;
+    final String username = usernameController.text.trim();
 
-    // 🔒 Validations
-    if (email.isEmpty || password.isEmpty) {
+    if (email.isEmpty || password.isEmpty || username.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Email and Password are required')),
+        const SnackBar(content: Text('All fields are required')),
       );
       return;
     }
@@ -31,6 +32,13 @@ class _RegisterPageState extends State<RegisterPage> {
     if (!email.contains('@') || !email.endsWith('@gmail.com')) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter a valid Gmail address')),
+      );
+      return;
+    }
+
+    if (!RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(username)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Username can only contain letters, numbers, and underscores')),
       );
       return;
     }
@@ -48,6 +56,7 @@ class _RegisterPageState extends State<RegisterPage> {
     final Map<String, dynamic> userData = {
       "email": email,
       "password": password,
+      "username": username,
     };
 
     try {
@@ -56,7 +65,7 @@ class _RegisterPageState extends State<RegisterPage> {
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(userData),
       );
-    
+
       setState(() => isLoading = false);
 
       if (response.statusCode == 201) {
@@ -88,6 +97,11 @@ class _RegisterPageState extends State<RegisterPage> {
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
+            TextField(
+              controller: usernameController,
+              decoration: const InputDecoration(labelText: "Username"),
+            ),
+            const SizedBox(height: 15),
             TextField(
               controller: emailController,
               decoration: const InputDecoration(labelText: "Email"),

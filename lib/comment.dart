@@ -17,6 +17,7 @@ class Comments extends StatefulWidget {
 
 class _CommentsState extends State<Comments> {
   List<dynamic>? comments = [];
+  String? loggedInUserName;
   String? loggedInEmail;
 
   @override
@@ -31,9 +32,22 @@ class _CommentsState extends State<Comments> {
 
     if (token != null && token.isNotEmpty && !JwtDecoder.isExpired(token)) {
       final decoded = JwtDecoder.decode(token);
-      loggedInEmail = decoded['email'];
-    } else {
-      loggedInEmail = null;
+      final userId = decoded['id'];
+
+      final response = await http.post(
+        Uri.parse(getUser),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"_id": userId}),
+      );
+
+      if (response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+        loggedInUserName = data['success']['username'];
+        loggedInEmail = data['success']['email'];
+      } else {
+        loggedInUserName = null;
+        loggedInEmail = null;
+      }
     }
 
     await fetchComments();
@@ -56,7 +70,7 @@ class _CommentsState extends State<Comments> {
 
         setState(() {
           comments = commentMap.entries
-              .map((entry) => {'useremail': entry.key, 'comment': entry.value})
+              .map((entry) => {'username': entry.key, 'comment': entry.value})
               .toList();
         });
       } else {
@@ -109,8 +123,8 @@ class _CommentsState extends State<Comments> {
                 if (commentController.text.isNotEmpty) {
                   var reqBody = {
                     'comment': commentController.text,
-                    'useremail': loggedInEmail,
-                    'questionid': widget.questionId,
+                    'useremail': loggedInUserName,
+                    '_id': widget.questionId,
                   };
 
                   var response = await http.post(
@@ -122,7 +136,7 @@ class _CommentsState extends State<Comments> {
                   if (response.statusCode == 201) {
                     Navigator.of(context).pop();
                     await Future.delayed(const Duration(milliseconds: 300));
-                    await fetchComments(); // refresh after adding
+                    await fetchComments();
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text("Failed to add comment.")),
@@ -158,13 +172,10 @@ class _CommentsState extends State<Comments> {
               itemBuilder: (context, index) {
                 final curr = comments![index];
                 return Card(
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 5,
-                    vertical: 10,
-                  ),
+                  margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
                   child: ListTile(
                     leading: const Icon(Icons.comment),
-                    title: Text(curr['useremail'] ?? 'Unknown User'),
+                    title: Text(curr['username'] ?? 'Unknown User'),
                     subtitle: Text(
                       curr['comment']?.toString().trim().isNotEmpty == true
                           ? curr['comment']

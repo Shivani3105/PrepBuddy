@@ -1,12 +1,11 @@
 const qnaServices = require("../services/qna.services");
 
-// ✅ Create new QnA
-exports.createqna = async (req, res, next) => {
+const createqna = async (req, res, next) => {
   try {
     const { useremail, subject, ques, companyname, count } = req.body;
     const qnaitem = await qnaServices.createqna(useremail, subject, ques, companyname, count);
     qnaitem.upvotedby.push(useremail);
-    await qnaitem.save(); // ✅ important
+    await qnaitem.save();
     res.status(201).json({
       status: true,
       success: qnaitem,
@@ -16,8 +15,7 @@ exports.createqna = async (req, res, next) => {
   }
 };
 
-// ✅ Add comment using Map: useremail => comment
-exports.addcomment = async (req, res, next) => {
+const addcomment = async (req, res, next) => {
   try {
     const { _id, useremail, comment } = req.body;
     const ques = await qnaServices.getQuesObj(_id);
@@ -26,7 +24,6 @@ exports.addcomment = async (req, res, next) => {
       return res.status(404).json({ message: "Question not found" });
     }
 
-    // 🔥 Use Map.set() to store comment
     ques.commentSection.set(useremail, comment);
     await ques.save();
 
@@ -39,8 +36,7 @@ exports.addcomment = async (req, res, next) => {
   }
 };
 
-// ✅ Get all comments for a question
-exports.getcomment = async (req, res, next) => {
+const getcomment = async (req, res, next) => {
   try {
     const { _id } = req.body;
     const ques = await qnaServices.getQuesObj(_id);
@@ -51,15 +47,14 @@ exports.getcomment = async (req, res, next) => {
 
     res.status(200).json({
       status: true,
-      success: Object.fromEntries(ques.commentSection), // Map to plain object
+      success: Object.fromEntries(ques.commentSection),
     });
   } catch (error) {
     next(error);
   }
 };
 
-// ✅ Get QnAs by subject
-exports.getqna = async (req, res, next) => {
+const getqna = async (req, res, next) => {
   try {
     const { subject } = req.body;
     const qnaitem = await qnaServices.getqna(subject);
@@ -72,8 +67,7 @@ exports.getqna = async (req, res, next) => {
   }
 };
 
-// ✅ Get QnAs by user
-exports.getUserQnA = async (req, res, next) => {
+const getUserQnA = async (req, res, next) => {
   try {
     const { email } = req.body;
     const Userqnaitem = await qnaServices.getUserQnA(email);
@@ -86,18 +80,20 @@ exports.getUserQnA = async (req, res, next) => {
   }
 };
 
-// ✅ Edit QnA
-exports.editqna = async (req, res) => {
-  const { _id, ques, companyname, count } = req.body;
-  const edititem = await qnaServices.editqna(_id, ques, companyname, count);
-  res.status(201).json({
-    status: true,
-    success: edititem,
-  });
+const editqna = async (req, res, next) => {
+  try {
+    const { _id, ques, companyname, count } = req.body;
+    const edititem = await qnaServices.editqna(_id, ques, companyname, count);
+    res.status(201).json({
+      status: true,
+      success: edititem,
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
-// ✅ Upvote QnA
-exports.upvoteuser = async (req, res, next) => {
+const upvoteuser = async (req, res, next) => {
   try {
     const { _id, useremail } = req.body;
     const quesobj = await qnaServices.getQuesObj(_id);
@@ -119,8 +115,7 @@ exports.upvoteuser = async (req, res, next) => {
   }
 };
 
-// ✅ Delete QnA
-exports.deleteqna = async (req, res, next) => {
+const deleteqna = async (req, res, next) => {
   try {
     const deleteitem = await qnaServices.deleteqna(req.params.id);
     res.status(200).json({
@@ -132,14 +127,13 @@ exports.deleteqna = async (req, res, next) => {
   }
 };
 
-// ✅ Export all
 module.exports = {
-  createqna: exports.createqna,
-  getqna: exports.getqna,
-  editqna: exports.editqna,
-  deleteqna: exports.deleteqna,
-  getUserQnA: exports.getUserQnA,
-  upvoteuser: exports.upvoteuser,
-  addcomment: exports.addcomment,
-  getcomment: exports.getcomment,
+  createqna,
+  getqna,
+  editqna,
+  deleteqna,
+  getUserQnA,
+  upvoteuser,
+  addcomment,
+  getcomment,
 };

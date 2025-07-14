@@ -7,6 +7,7 @@ router.put('/editQnA', qnaController.editqna);
 router.delete('/deleteQnA/:id', qnaController.deleteqna);
 router.post('/getUserQnA', qnaController.getUserQnA);
 router.post('/upvoteuser', qnaController.upvoteuser);
-router.post('/addComment',qnaController.addcomment);
-router.post('/getComment',qnaController.getcomment);
+router.post('/addComment', qnaController.addcomment);
+router.post('/getComment', qnaController.getcomment);
+
 module.exports = router;

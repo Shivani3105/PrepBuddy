@@ -1,33 +1,30 @@
 const qnaModel = require("../model/qna.model");
 
 class QnAServices {
-  static async createqna(useremail,subject, ques, companyname,count) {
-    
-    const createqnaitem = new qnaModel({useremail, subject, ques, companyname,count }); // ✅ updated field
+  static async createqna(useremail, subject, ques, companyname, count) {
+    const createqnaitem = new qnaModel({ useremail, subject, ques, companyname, count });
     return await createqnaitem.save();
   }
 
   static async getqna(subject) {
-    const qnadata = await qnaModel.find({ subject });
-    return qnadata;
+    return await qnaModel.find({ subject });
   }
-    static async getUserQnA(email) {
-    const qnadata = await qnaModel.find({useremail:email});
-    return qnadata;
+
+  static async getUserQnA(email) {
+    return await qnaModel.find({ useremail: email });
   }
-  static async getQuesObj(_id)
-  {
+
+  static async getQuesObj(_id) {
     return await qnaModel.findById(_id);
   }
 
-  static async editqna(_id, ques, companyname,count) {
-    return await qnaModel.findByIdAndUpdate(_id, { ques, companyname ,count}); // ✅ updated field
+  static async editqna(_id, ques, companyname, count) {
+    return await qnaModel.findByIdAndUpdate(_id, { ques, companyname, count });
   }
 
   static async deleteqna(id) {
     return await qnaModel.findByIdAndDelete(id);
   }
-  
 }
 
 module.exports = QnAServices;
