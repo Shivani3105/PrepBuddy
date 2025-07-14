@@ -17,14 +17,14 @@ const createqna = async (req, res, next) => {
 
 const addcomment = async (req, res, next) => {
   try {
-    const { _id, useremail, comment } = req.body;
+    const { _id, username, comment } = req.body;
     const ques = await qnaServices.getQuesObj(_id);
 
     if (!ques) {
       return res.status(404).json({ message: "Question not found" });
     }
 
-    ques.commentSection.set(useremail, comment);
+    ques.commentSection.set(username, comment);
     await ques.save();
 
     res.status(201).json({
