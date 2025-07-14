@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_2/SignInPage.dart';
 import 'package:http/http.dart' as http;
-import 'config.dart';
+import 'config.dart'; // Ensure it has your API URL
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -14,14 +14,15 @@ class RegisterPage extends StatefulWidget {
 class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController usernameController = TextEditingController();
+  final TextEditingController usernameController = TextEditingController(); // ✅ added
   bool isLoading = false;
 
   Future<void> registerUser() async {
     final String email = emailController.text.trim();
     final String password = passwordController.text;
-    final String username = usernameController.text.trim();
+    final String username = usernameController.text.trim(); // ✅ added
 
+    // 🔒 Validations
     if (email.isEmpty || password.isEmpty || username.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('All fields are required')),
@@ -56,7 +57,7 @@ class _RegisterPageState extends State<RegisterPage> {
     final Map<String, dynamic> userData = {
       "email": email,
       "password": password,
-      "username": username,
+      "username": username, // ✅ send to backend
     };
 
     try {
@@ -99,7 +100,7 @@ class _RegisterPageState extends State<RegisterPage> {
           children: [
             TextField(
               controller: usernameController,
-              decoration: const InputDecoration(labelText: "Username"),
+              decoration: const InputDecoration(labelText: "Username"), // ✅ added
             ),
             const SizedBox(height: 15),
             TextField(

@@ -80,10 +80,11 @@ class _DashboardState extends State<Dashboard> {
     }
   }
 
-  Future<void> handleUpvote(String id) async {
+  Future<void> handleUpvote(String quesId) async {
+  try {
     var body = {
-      "_id": id,
-      "useremail": loggedInEmail,
+      "_id": quesId,
+      "userId": loggedInEmail, // You are sending this to backend
     };
 
     var response = await http.post(
@@ -93,15 +94,26 @@ class _DashboardState extends State<Dashboard> {
     );
 
     if (response.statusCode == 200) {
-      await fetchTasks(); // Refresh with new upvote
+      final result = jsonDecode(response.body);
+      await fetchTasks(); // Refresh updated data from backend
+
+      if (!result['status']) {
+        // Upvote removed
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Upvote removed")),
+        );
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(jsonDecode(response.body)['message'] ?? "Already upvoted"),
-        ),
+        SnackBar(content: Text("Failed: ${response.body}")),
       );
     }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Error: $e")),
+    );
   }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -166,48 +178,76 @@ class _DashboardState extends State<Dashboard> {
                     itemBuilder: (context, index) {
                       final task = items![index];
                       return Card(
-                        margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
-                        child: ListTile(
-                          leading: const Icon(Icons.question_answer),
-                          title: Text(task['ques']),
-                          subtitle: Text(
-                            task['companyname']?.toString().trim().isNotEmpty == true
-                                ? task['companyname']
-                                : 'No company specified',
-                            style: const TextStyle(color: Colors.grey),
-                          ),
-                          trailing: SizedBox(
-                            width: 100,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-  DateFormat('dd MMM yyyy, hh:mm a').format(DateTime.parse(task['createdAt'] ?? '')),
-  style: const TextStyle(fontSize: 10, color: Colors.grey),
-),
-
-                                IconButton(
-  icon: const Icon(Icons.comment),
-  onPressed: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => Comments(questionId: task['_id']),
+  margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+  child: Padding(
+    padding: const EdgeInsets.all(10),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Icon(Icons.question_answer),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                task['ques'],
+                style: const TextStyle(fontSize: 16),
+                softWrap: true,
+              ),
+              const SizedBox(height: 5),
+              Text(
+                "Company: ${task['companyname']?.toString().trim().isNotEmpty == true ? task['companyname'] : 'Not specified'}",
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                DateFormat('dd MMM yyyy, hh:mm a')
+                    .format(DateTime.parse(task['createdAt']).toLocal()),
+                style: const TextStyle(fontSize: 10, color: Colors.grey),
+              ),
+            ],
+          ),
+        ),
+        Row(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.comment),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => Comments(questionId: task['_id']),
+                  ),
+                );
+              },
+            ),
+            GestureDetector(
+  onTap: () => handleUpvote(task['_id']),
+  child: Column(
+    children: [
+      Icon(
+        Icons.arrow_upward,
+        size: 24,
+        color: task['upvotedby'] != null &&
+                task['upvotedby'].contains(loggedInEmail)
+            ? Colors.blue
+            : Colors.grey,
       ),
-    );
-  },
+      Text(
+        "${task['count']}",
+        style: const TextStyle(fontSize: 10),
+      ),
+    ],
+  ),
 ),
 
-                                IconButton(
-                                  icon: Image.asset('assets/arrow.png'),
-                                  onPressed: () => handleUpvote(task['_id']),
-                                ),
-                                Text("${task['count']}", style: const TextStyle(fontSize: 10)),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
+          ],
+        )
+      ],
+    ),
+  ),
+);
                     },
                   ),
           ),

@@ -1,3 +1,4 @@
+// ✅ UPDATED COMMENTS PAGE WITH IST TIME DISPLAY
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_2/config.dart';
@@ -5,10 +6,10 @@ import 'package:flutter_application_2/startscreen.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:intl/intl.dart';
 
 class Comments extends StatefulWidget {
   final String questionId;
-
   const Comments({super.key, required this.questionId});
 
   @override
@@ -38,13 +39,10 @@ class _CommentsState extends State<Comments> {
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"_id": userId}),
       );
-      print(userId);
-      print("*****************");
-      print(response.body);
+
       if (response.statusCode == 201) {
         final data = jsonDecode(response.body);
         loggedInUserName = data['success']['username'];
-        print(loggedInUserName);
       } else {
         loggedInUserName = null;
       }
@@ -63,14 +61,10 @@ class _CommentsState extends State<Comments> {
       );
 
       if (response.statusCode == 200) {
-        Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-        Map<String, dynamic> commentMap =
-            Map<String, dynamic>.from(jsonResponse['success']);
+        List<dynamic> jsonResponse = jsonDecode(response.body)['success'];
 
         setState(() {
-          comments = commentMap.entries
-              .map((entry) => {'username': entry.key, 'comment': entry.value})
-              .toList();
+          comments = jsonResponse;
         });
       } else {
         setState(() => comments = []);
@@ -171,8 +165,10 @@ class _CommentsState extends State<Comments> {
               itemBuilder: (context, index) {
                 final curr = comments![index];
                 final isCurrentUser = curr['username'] == loggedInUserName;
+
                 return Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
                   child: ListTile(
                     leading: const Icon(Icons.comment),
                     title: Row(
@@ -180,9 +176,11 @@ class _CommentsState extends State<Comments> {
                         Text(
                           curr['username'] ?? 'Unknown User',
                           style: TextStyle(
-                            fontWeight:
-                                isCurrentUser ? FontWeight.bold : FontWeight.normal,
-                            color: isCurrentUser ? Colors.blue : Colors.black,
+                            fontWeight: isCurrentUser
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                            color:
+                                isCurrentUser ? Colors.blue : Colors.black,
                           ),
                         ),
                         if (isCurrentUser)
@@ -192,11 +190,25 @@ class _CommentsState extends State<Comments> {
                           ),
                       ],
                     ),
-                    subtitle: Text(
-                      curr['comment']?.toString().trim().isNotEmpty == true
-                          ? curr['comment']
-                          : 'No comment specified',
-                      style: const TextStyle(color: Colors.grey),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          curr['comment']?.toString().trim().isNotEmpty == true
+                              ? curr['comment']
+                              : 'No comment specified',
+                          style: const TextStyle(color: Colors.grey),
+                        ),
+                        const SizedBox(height: 4),
+                        if (curr['timestamp'] != null)
+                          Text(
+                            DateFormat('dd MMM yyyy, hh:mm a').format(
+                              DateTime.parse(curr['timestamp']).toLocal(),
+                            ),
+                            style:
+                                const TextStyle(fontSize: 10, color: Colors.grey),
+                          ),
+                      ],
                     ),
                   ),
                 );

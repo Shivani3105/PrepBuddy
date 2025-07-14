@@ -27,11 +27,14 @@ const qnaSchema = new Schema({
     type: [String],
     default: []
   },
-  commentSection: {
-    type: Map,
-    of: String,
-    default: {}
-  },
+commentSection: [
+  {
+    user: String,
+    comment: String,
+    timestamp: { type: Date, default: Date.now }
+  }
+],
+
   createdAt:{
     type:Date,
     default:Date.now

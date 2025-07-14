@@ -155,7 +155,7 @@ class _MyQuestionsPageState extends State<MyQuestionsPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("My Questions"),
-        backgroundColor: Colors.blue.shade800,
+        backgroundColor: Colors.blue,
       ),
       body: items == null || items!.isEmpty
           ? const Center(child: Text("You haven't added any questions yet."))
@@ -164,44 +164,62 @@ class _MyQuestionsPageState extends State<MyQuestionsPage> {
               itemBuilder: (context, index) {
                 final task = items![index];
                 return Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                  child: ListTile(
-                    leading: const Icon(Icons.question_answer),
-                    title: Text(task['ques']),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text("Company: ${task['companyname'] ?? 'Not specified'}"),
-                        Text("Subject: ${task['subject']}", style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                      ],
-                    ),
-                    trailing: SizedBox(
-                      width: 150,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                           Text(
-  DateFormat('dd MMM yyyy, hh:mm a').format(DateTime.parse(task['createdAt'] ?? '')),
-  style: const TextStyle(fontSize: 10, color: Colors.grey),
-),
-                          IconButton(
-                            icon: const Icon(Icons.thumb_up, color: Colors.green),
-                            onPressed: () => handleUpvote(task['_id']),
-                          ),
-                          Text("${task['count']}", style: const TextStyle(fontSize: 10)),
-                          IconButton(
-                            icon: const Icon(Icons.edit, color: Colors.blue),
-                            onPressed: () => showEditDialog(task),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () async => await deleteTask(task['_id']),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
+  margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+  child: Padding(
+    padding: const EdgeInsets.all(10),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Icon(Icons.question_answer),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                task['ques'],
+                style: const TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                "Company: ${task['companyname']?.toString().trim().isNotEmpty == true ? task['companyname'] : 'Not specified'}",
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+              Text(
+                "Subject: ${task['subject']}",
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                DateFormat('dd MMM yyyy, hh:mm a')
+                    .format(DateTime.parse(task['createdAt']).toLocal()),
+                style: const TextStyle(fontSize: 10, color: Colors.grey),
+              ),
+            ],
+          ),
+        ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: Image.asset('assets/arrow.png', width: 20, height: 20),
+              onPressed: () => handleUpvote(task['_id']),
+            ),
+            Text("${task['count']}", style: const TextStyle(fontSize: 10)),
+            IconButton(
+              icon: const Icon(Icons.edit, color: Colors.blue),
+              onPressed: () => showEditDialog(task),
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete, color: Colors.red),
+              onPressed: () => deleteTask(task['_id']),
+            ),
+          ],
+        ),
+      ],
+    ),
+  ),
+);
               },
             ),
     );

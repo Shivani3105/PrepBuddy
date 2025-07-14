@@ -4,7 +4,7 @@ const createqna = async (req, res, next) => {
   try {
     const { useremail, subject, ques, companyname, count } = req.body;
     const qnaitem = await qnaServices.createqna(useremail, subject, ques, companyname, count);
-    qnaitem.upvotedby.push(useremail);
+    //qnaitem.upvotedby.push(useremail);
     await qnaitem.save();
     res.status(201).json({
       status: true,
@@ -24,7 +24,7 @@ const addcomment = async (req, res, next) => {
       return res.status(404).json({ message: "Question not found" });
     }
 
-    ques.commentSection.set(username, comment);
+    ques.commentSection.push({ user: username, comment });
     await ques.save();
 
     res.status(201).json({
@@ -95,25 +95,33 @@ const editqna = async (req, res, next) => {
 
 const upvoteuser = async (req, res, next) => {
   try {
-    const { _id, useremail } = req.body;
-    const quesobj = await qnaServices.getQuesObj(_id);
+    const { _id, userId } = req.body; // userId is the user's email or unique identifier
 
+    const quesobj = await qnaServices.getQuesObj(_id);
     if (!quesobj) {
       return res.status(404).json({ message: "Question not found" });
     }
 
-    if (!quesobj.upvotedby.includes(useremail)) {
+    if (!quesobj.upvotedby.includes(userId)) {
       quesobj.count += 1;
-      quesobj.upvotedby.push(useremail);
+      quesobj.upvotedby.push(userId);
       await quesobj.save();
-      return res.status(200).json({ message: "Successfully upvoted" });
+      return res.status(200).json({ status: true, message: "Upvoted" });
     } else {
-      return res.status(400).json({ message: "You have already upvoted this question" });
+      // Remove userId from upvotedby array
+      const index = quesobj.upvotedby.indexOf(userId);
+      if (index !== -1) {
+        quesobj.upvotedby.splice(index, 1);
+      }
+      quesobj.count -= 1;
+      await quesobj.save();
+      return res.status(200).json({ status: false, message: "Upvote removed" });
     }
   } catch (error) {
     next(error);
   }
 };
+
 
 const deleteqna = async (req, res, next) => {
   try {
