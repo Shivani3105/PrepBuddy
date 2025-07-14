@@ -29,7 +29,7 @@ const addcomment = async (req, res, next) => {
 
     res.status(201).json({
       status: true,
-      success: Object.fromEntries(ques.commentSection),
+      success: ques.commentSection
     });
   } catch (error) {
     next(error);
@@ -47,7 +47,7 @@ const getcomment = async (req, res, next) => {
 
     res.status(200).json({
       status: true,
-      success: Object.fromEntries(ques.commentSection),
+      success: ques.commentSection,
     });
   } catch (error) {
     next(error);

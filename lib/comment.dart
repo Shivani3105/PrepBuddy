@@ -164,7 +164,7 @@ class _CommentsState extends State<Comments> {
               itemCount: comments!.length,
               itemBuilder: (context, index) {
                 final curr = comments![index];
-                final isCurrentUser = curr['username'] == loggedInUserName;
+                final isCurrentUser = curr['user'] == loggedInUserName;
 
                 return Card(
                   margin:
@@ -174,7 +174,7 @@ class _CommentsState extends State<Comments> {
                     title: Row(
                       children: [
                         Text(
-                          curr['username'] ?? 'Unknown User',
+                          curr['user'] ?? 'Unknown User',
                           style: TextStyle(
                             fontWeight: isCurrentUser
                                 ? FontWeight.bold
