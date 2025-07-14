@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_2/config.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 
@@ -179,6 +180,10 @@ class _MyQuestionsPageState extends State<MyQuestionsPage> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                           Text(
+  DateFormat('dd MMM yyyy, hh:mm a').format(DateTime.parse(task['createdAt'] ?? '')),
+  style: const TextStyle(fontSize: 10, color: Colors.grey),
+),
                           IconButton(
                             icon: const Icon(Icons.thumb_up, color: Colors.green),
                             onPressed: () => handleUpvote(task['_id']),

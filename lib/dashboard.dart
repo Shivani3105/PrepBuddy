@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'config.dart';
+import 'package:intl/intl.dart';
 
 class Dashboard extends StatefulWidget {
   final String subject;
@@ -180,6 +181,11 @@ class _DashboardState extends State<Dashboard> {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
+                                Text(
+  DateFormat('dd MMM yyyy, hh:mm a').format(DateTime.parse(task['createdAt'] ?? '')),
+  style: const TextStyle(fontSize: 10, color: Colors.grey),
+),
+
                                 IconButton(
   icon: const Icon(Icons.comment),
   onPressed: () {
