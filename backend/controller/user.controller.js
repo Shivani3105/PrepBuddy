@@ -23,8 +23,8 @@ const register = async (req, res) => {
 
 const getUser = async (req, res) => {
   try {
-    const { email } = req.body; // changed from _id to email
-    const user = await UserService.getUser(email);
+    const { _id } = req.body; // changed from _id to email
+    const user = await UserService.getUserById(_id);
 
     if (!user) {
       return res.status(401).json({

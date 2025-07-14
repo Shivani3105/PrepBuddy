@@ -18,7 +18,6 @@ class Comments extends StatefulWidget {
 class _CommentsState extends State<Comments> {
   List<dynamic>? comments = [];
   String? loggedInUserName;
-  String? loggedInEmail;
 
   @override
   void initState() {
@@ -39,14 +38,13 @@ class _CommentsState extends State<Comments> {
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"_id": userId}),
       );
-
+      print("*****************");
+      print(response.body);
       if (response.statusCode == 201) {
         final data = jsonDecode(response.body);
         loggedInUserName = data['success']['username'];
-        loggedInEmail = data['success']['email'];
       } else {
         loggedInUserName = null;
-        loggedInEmail = null;
       }
     }
 
@@ -64,9 +62,8 @@ class _CommentsState extends State<Comments> {
 
       if (response.statusCode == 200) {
         Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-        Map<String, dynamic> commentMap = Map<String, dynamic>.from(
-          jsonResponse['success'],
-        );
+        Map<String, dynamic> commentMap =
+            Map<String, dynamic>.from(jsonResponse['success']);
 
         setState(() {
           comments = commentMap.entries
@@ -94,7 +91,7 @@ class _CommentsState extends State<Comments> {
   }
 
   void onPressedFunc() {
-    if (loggedInEmail == null) {
+    if (loggedInUserName == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("User not logged in! Please sign in.")),
       );
@@ -171,11 +168,28 @@ class _CommentsState extends State<Comments> {
               itemCount: comments!.length,
               itemBuilder: (context, index) {
                 final curr = comments![index];
+                final isCurrentUser = curr['username'] == loggedInUserName;
                 return Card(
                   margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
                   child: ListTile(
                     leading: const Icon(Icons.comment),
-                    title: Text(curr['username'] ?? 'Unknown User'),
+                    title: Row(
+                      children: [
+                        Text(
+                          curr['username'] ?? 'Unknown User',
+                          style: TextStyle(
+                            fontWeight:
+                                isCurrentUser ? FontWeight.bold : FontWeight.normal,
+                            color: isCurrentUser ? Colors.blue : Colors.black,
+                          ),
+                        ),
+                        if (isCurrentUser)
+                          const Text(
+                            " (You)",
+                            style: TextStyle(fontSize: 12, color: Colors.grey),
+                          ),
+                      ],
+                    ),
                     subtitle: Text(
                       curr['comment']?.toString().trim().isNotEmpty == true
                           ? curr['comment']
